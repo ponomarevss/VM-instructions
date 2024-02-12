@@ -341,4 +341,282 @@ TriggeredBy: ● docker.socket
 ```
 Следующие шаги по работе с Docker описаны здесь:  
 https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-22-04
+## Установка и настройка Git
+В базовой Ubuntu 22.04 server Git уже установлен. Проверить командой:
+```python
+      	$ git --version
+```
+Должен быть вывод:
+```python
+Output
+git version 2.34.1
+```
+Настройка Git
 
+Нужно указать имя и email:
+```python
+      	$ git config --global user.name "Your Name"
+      	$ git config --global user.email "youremail@domain.com"
+```
+Отобразить конфигурацию:
+```python
+      	$ git config --list
+```
+```python
+Output
+user.name=Your Name
+user.email=youremail@domain.com
+...
+```
+Предоставленная информация хранится в файле, который можно отредактировать:
+```python
+      	$ nano ~/.gitconfig
+```
+Отобразится:
+```python
+[user]
+  name = Your Name
+  email = youremail@domain.com
+```
+## Установка и настройка Python
+1. Установка Python 3
+
+Ubuntu 22.04 имеет предустановленный Python 3. Обновить индекс локального пакета:
+```python
+      	$ sudo apt update
+```
+Апгрейд локальных пакетов:
+```python
+      	$ sudo apt -y upgrade
+```
+Проверить версию Python 3:
+```python
+      	$ python3 -V
+```
+Должен быть получен следующий вывод:
+```python
+Output
+Python 3.10.4
+```
+Установить pip:
+```python
+      	$ sudo apt install -y python3-pip
+```
+И пакеты Python:
+```python
+      	$ pip3 install package_name
+      	$ sudo apt install -y build-essential libssl-dev libffi-dev python3-dev
+```
+Перейти к настройке виртуального окружения.
+
+2. Настройка виртуального окружения
+
+Установить venv командой:
+```python
+      	$ sudo apt install -y python3-venv
+```
+Создать виртуальное окружение. Выбрать директорию для размещения или, как здесь, создать:
+```python
+      	$ mkdir environments
+```
+Перейти в созданную директорию:
+```python
+      	$ cd environments
+```
+Находясь в директории, создать окружение:
+```python
+      	$ python3 -m venv my_env
+```
+Важно: pyvenv задает новую директорию с необходимыми элементами:
+```python
+      	$ ls my_env
+```
+```python
+Output
+bin  include  lib  lib64  pyvenv.cfg
+```
+Чтобы использовать окружение, нужно его активировать:
+```python
+      	$ source my_env/bin/activate
+```
+Теперь промпт команды будут начинаться с префикса (my_env).
+
+3. Создать “Hello, World” программу
+
+Убедиться, что все работает правильно можно при помощи традиционной “Hello, World!” программы. Создать новый файл:
+```python
+      	(my_env) sammy@ubuntu:~/environments$ nano hello.py
+```
+Редактировать файл hello.py:
+```python
+      	print("Hello, World!")
+```
+Сохранить изменения CTRL + X, Y, и ENTER.
+
+Теперь запустить программу:
+```python
+	(my_env) sammy@ubuntu:~/environments$ python hello.py
+```
+Должен быть получен вывод:
+```python
+Output
+Hello, World!
+```
+Чтобы выйти из окружения, набрать команду deactivate.
+## Установка и настройка Redis
+1. Установка и конфигурирование Redis
+
+Апдейт локального кэша пакета apt:
+```python
+      	$ sudo apt update
+```
+Установка Redis:
+```python
+      	$ sudo apt install redis-server
+```
+Начнется загрузка и установка Redis и его зависимостей. 
+После этого, необходимо выполнить важное изменение в Redis конфигурационном файле.
+
+Открыть файл в текстовом редакторе:
+```python
+      	$ sudo nano /etc/redis/redis.conf
+```
+Отредактировать директиву следующим образом:
+```python
+. . .
+
+# If you run Redis from upstart or systemd, Redis can interact with your
+# supervision tree. Options:
+#   supervised no      - no supervision interaction
+#   supervised upstart - signal upstart by putting Redis into SIGSTOP mode
+#   supervised systemd - signal systemd by writing READY=1 to $NOTIFY_SOCKET
+#   supervised auto    - detect upstart or systemd method based on
+#                        UPSTART_JOB or NOTIFY_SOCKET environment variables
+# Note: these supervision methods only signal "process is ready."
+#       They do not enable continuous liveness pings back to your supervisor.
+supervised systemd
+
+. . .
+```
+Выйти из файла с сохранением: CTRL + X, Y, затем ENTER.
+
+Рестарт Redis для принятия изменений:
+```python
+      	$ sudo systemctl restart redis.service
+```
+2. Тестирование Redis
+
+Проверить запущен ли Redis:
+```python
+      	$ sudo systemctl status redis
+```
+Если он работает без ошибок, то отобразится следующий вывод:
+```python
+Output
+● redis-server.service - Advanced key-value store
+     Loaded: loaded (/lib/systemd/system/redis-server.service; enabled; vendor preset: enabled)
+     Active: active (running) since Wed 2022-04-20 20:40:52 UTC; 4s ago
+       Docs: http://redis.io/documentation,
+             man:redis-server(1)
+   Main PID: 2899 (redis-server)
+     Status: "Ready to accept connections"
+      Tasks: 5 (limit: 2327)
+     Memory: 2.5M
+        CPU: 65ms
+     CGroup: /system.slice/redis-server.service
+             └─2899 "/usr/bin/redis-server 127.0.0.1:6379
+. . .
+```
+Для проверки работы Redis, соединиться с сервером через командную строку redis-cli:
+```python
+      	$ redis-cli
+```
+Проверка соединения:
+```python
+	127.0.0.1:6379> ping
+```
+```python
+Output
+PONG
+```
+Этот вывод подтверждает, что подключение активно. Далее, проверить возможность устанавливать ключи:
+```python
+	127.0.0.1:6379> set test "It's working!"
+```
+```python
+Output
+OK
+```
+Получить значение:
+```python
+	127.0.0.1:6379> get test
+```
+Если все работает, получить вывод:
+```python
+Output
+"It's working!"
+```
+Убедившись в возможности получать значения покинуть Redis prompt чтоб вернуться обратно в оболочку:
+```python
+	127.0.0.1:6379> exit
+```
+Убедиться, что Redis сохраняет данные после перезагрузки:
+```python
+      	$ sudo systemctl restart redis
+```
+Соединиться с клиентом:
+```python
+      	$ redis-cli
+```
+And confirm that your test value is still available
+```python
+	127.0.0.1:6379> get test
+```
+Значение по ключу должно быть доступно:
+```python
+Output
+"It's working!"
+```
+Выход из клиента:
+```python
+	127.0.0.1:6379> exit
+```
+3. Привязка к localhost
+
+По умолчанию, Redis доступен только через localhost.
+Проверить конфигурационный файл:
+```python
+      	$ sudo nano /etc/redis/redis.conf
+```
+Убедиться, что активна директива:
+```python
+. . .
+bind 127.0.0.1 ::1
+. . .
+```
+Выйти из файла (CTRL + X, Y, затем ENTER).
+
+Перезагрузить сервис для принятия изменений:
+```python
+      	$ sudo systemctl restart redis
+```
+Проверить работу:
+```python
+      	$ sudo netstat -lnp | grep redis
+```
+```python
+Output
+tcp        0      0 127.0.0.1:6379          0.0.0.0:*               LISTEN      14222/redis-server  
+tcp6       0      0 ::1:6379                :::*                    LISTEN      14222/redis-server  
+```
+Примечание: команда netstat недоступна по-умолчанию. Установить следующим образом:
+```python
+      	$ sudo apt install net-tools
+```
+Вывод говорит о том, что redis-server привязан к localhost (127.0.0.1)
+
+Дальнейшие шаги:  
+4. Установка пароля Redis,  
+5. Переименование опасных команд Renaming,  
+направлены на улучшение безопасности. Ознакомиться с ними можно здесь:  
+https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-redis-on-ubuntu-22-04
